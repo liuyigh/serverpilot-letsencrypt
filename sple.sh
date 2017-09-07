@@ -1,7 +1,7 @@
 #!/bin/bash
 # Bash script to create/add Let's Encrypt SSL to ServerPilot app
 # by Rudy Affandi (2016)
-# Edited Aug 14, 2016
+# Edited Sep 07, 2017 by Yi Liu
 
 # Todo
 # 1. Generate certificate
@@ -13,7 +13,6 @@
 
 # Settings
 ubuntu=$(lsb_release -r -s)
-certbotfolder=/usr/local/bin/certbot-auto
 appfolder=/srv/users/$username/apps
 conffolder=/etc/nginx-sp/vhosts.d
 acmeconfigfolder=/etc/nginx-sp/letsencrypt.d
@@ -28,27 +27,6 @@ then
 fi
 
 # Check for Ubuntu version
-# 14.04 Trusty Tahr
-if [ $ubuntu == '14.04' ]
-then
-
-    # Check for Let's Encrypt installation
-    if [ ! -f "$certbotfolder" ]
-    then
-        echo "Let's Encrypt is not installed/found in your root folder. Would you like to install it?"
-        read -p "Y or N " -n 1 -r
-        echo ""
-        if [[ "$REPLY" =~ ^[Yy]$ ]]
-        then
-            cd /root && sudo wget https://dl.eff.org/certbot-auto
-            chmod a+x certbot-auto
-            mv certbot-auto /usr/local/bin/
-        else
-            exit
-        fi
-    fi
-fi
-
 # 16.04 Xenial Xerus
 if [ $ubuntu == '16.04' ]
 then
@@ -66,6 +44,9 @@ then
             sudo apt-get install letsencrypt -y
         fi 
     fi
+else
+	echo "This script only support Ubuntu 16.04. Please check original script."
+	exit 1
 fi
 
 echo ""
@@ -109,18 +90,7 @@ echo ""
 echo "Generating SSL certificate for $appname"
 echo ""
 
-# Check for Ubuntu version
-# 14.04 Trusty Tahr
-if [ $ubuntu == '14.04' ]
-then
-    /usr/local/bin/certbot-auto certonly --webroot -w /srv/users/$username/apps/$appname/public ${APPDOMAINLIST[@]}
-fi
-
-# 16.04 Xenial Xerus
-if [ $ubuntu == '16.04' ]
-then
-    letsencrypt certonly --webroot -w /srv/users/$username/apps/$appname/public ${APPDOMAINLIST[@]}
-fi
+letsencrypt certonly --webroot -w /srv/users/$username/apps/$appname/public ${APPDOMAINLIST[@]}
 
 # Check the ACME configuration file for Nginx
 if [ ! -f "$acmeconfigfile" ] 
@@ -212,17 +182,7 @@ echo ""
 echo "To enable auto-renewal, add the following to your crontab:"
 
 # Append new schedule to crontab
-# 14.04 Trusty Tahr
-if [ $ubuntu == '14.04' ]
-then
-    echo "0 */12 * * * /usr/local/bin/certbot-auto renew --quiet --no-self-upgrade --post-hook \"service nginx-sp reload\""
-fi
-
-# 16.04 Xenial Xerus
-if [ $ubuntu == '16.04' ]
-then
-    echo "0 */12 * * * letsencrypt renew && service nginx-sp reload"
-fi
+echo "0 */12 * * * letsencrypt renew && service nginx-sp reload"
 
 echo ""
 echo ""
