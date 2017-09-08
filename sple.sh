@@ -5,7 +5,7 @@
 
 # Todo
 # 1. Generate certificate
-# /usr/local/bin/certbot-auto certonly --webroot -w /srv/users/$username/apps/appname/public -d appdomain.tld
+# /usr/local/bin/letsencrypt certonly --webroot -w /srv/users/$username/apps/appname/public -d appdomain.tld
 # 2. Generate appname.ssl.conf file
 # 3. Restart nginx
 # sudo service nginx-sp restart
